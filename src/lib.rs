@@ -1,19 +1,19 @@
 extern crate dns_lookup;
 
-use std::net::IpAddr;
+use dns_lookup::{lookup_addr, lookup_host};
 use std::io::Error;
-use dns_lookup::{lookup_host, lookup_addr};
+use std::net::IpAddr;
 
 pub fn check(ip_addr: IpAddr) -> Result<bool, Error> {
     let ip_addr: IpAddr = ip_addr.into();
     let hostname = lookup_addr(&ip_addr)?;
 
-    if !(hostname.ends_with(".google.com") || hostname.ends_with(".googlebot.com")) {
-        return Ok(false);
+    if hostname.ends_with(".google.com") || hostname.ends_with(".googlebot.com") {
+        let ips: Vec<IpAddr> = lookup_host(&hostname)?;
+        Ok(ips.contains(&ip_addr))
+    } else {
+        Ok(false)
     }
-
-    let ips: Vec<IpAddr> = lookup_host(&hostname)?;
-    Ok(ips.contains(&ip_addr))
 }
 
 #[cfg(test)]
